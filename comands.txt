@@ -1,0 +1,82 @@
+
+These are all the commands used to set up this project.
+Some can be executed automatically or manually, i am trying them manually first
+to make sure they work
+
+
+#Building the docker container
+docker build -t ft_server .
+
+#Running the docker container from the docker file
+docker run -it -p 80:80 -p 443:443 ft_server
+
+#Run the debian:buster image directly from the source (everything else done manually)
+docker run -p80:80 -it debian:buster /bin/sh
+	#this gets you in the debian shell
+exit #to get out of the debian shell back to your own
+
+
+#First things first
+apt-get update
+apt-get upgrade -y
+	# should we be using apt-get ?
+L'option -y permet de répondre oui par avance aux demandes de confirmations
+
+#Install Nginx
+apt-get -y install nginx
+
+#Run Nginx (allows you to see the default page at localhost:80)
+service nginx start
+# if do upgrade this might work... NOPE
+systemctl start nginx
+	#stop to end ?
+sleep infinity	#necessary ?
+
+#Nginx config file is here:
+etc/nginx/sites-available
+
+
+
+#Install PHP
+apt-get install -y php7.3 php7.3-fpm php7.3-mysql php-common php7.3-cli \
+php7.3-common php7.3-json php7.3-opcache php7.3-readline
+	#watch out for tab in middle of above line, fucks execution up.
+
+#Start PHP
+service php7.3-fpm start
+
+Ajouter index.php dans les configurations de Nginx.
+
+#Can now make a test.php file to see if it's up...
+#You may want to install vim...
+apt-get -y install vim
+
+# I put a test.php file containing: "<?php phpinfo();" in /var/www/html
+# it didn't do much, does not run as expected when i go to localhost/test.php
+# Not sure if this means php isn't working or i didnt do it right...
+# I can modify the index.html file tho and see it instantly on localhost
+
+
+
+# Testing if installing ssl makes php work...
+# Didn't change anything
+#Install SSL
+apt-get install openssl
+
+#More SSL stuff, not sure what it does but seems useful
+openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out /etc/nginx/ssl/localhost.pem -keyout /etc/nginx/ssl/localhost.key -subj "/C=FR/ST=Paris/L=Paris/O=42 School/OU=emma/CN=localhost"
+
+#Configure Nginx to use SSL
+ssl_certificate /etc/nginx/ssl/localhost.pem;
+ssl_certificate_key /etc/nginx/ssl/localhost.key;
+	#in the config file
+
+
+
+
+
+
+
+
+
+
