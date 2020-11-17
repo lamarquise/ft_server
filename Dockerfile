@@ -4,13 +4,20 @@ RUN apt-get update
 RUN apt-get upgrade -y
 
 RUN apt -y install nginx
+RUN apt-get install -y wget
 
-RUN apt install wget -y
+RUN apt-get install -y php7.3 php7.3-fpm php7.3-mysql php-common php7.3-cli \
+php7.3-common php7.3-json php7.3-opcache php7.3-readline
 
-RUN apt-get -y install php7.3 php-mysql php-fpm php-cli php-mbstring
+RUN apt-get -y install vim
 
-RUN apt-get -y install mariadb-server
+RUN apt-get install -y mariadb-server mariadb-client
 
+RUN apt-get install openssl
 
-WORKDIR /ft_server
-COPY . .
+EXPOSE 80
+EXPOSE 443
+
+COPY ./srcs ./
+
+CMD bash start.sh

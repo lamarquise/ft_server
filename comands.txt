@@ -10,6 +10,10 @@ docker build -t ft_server .
 #Running the docker container from the docker file
 docker run -it -p 80:80 -p 443:443 ft_server
 
+#Running the docker container from the docker file with access to the shell
+docker run -it -p 80:80 -p 443:443 ft_server /bin/sh
+
+
 #Run the debian:buster image directly from the source (everything else done manually)
 docker run -p80:80 -it debian:buster /bin/sh
 	#this gets you in the debian shell
@@ -27,8 +31,6 @@ apt-get -y install nginx
 
 #Run Nginx (allows you to see the default page at localhost:80)
 service nginx start
-# if do upgrade this might work... NOPE
-systemctl start nginx
 	#stop to end ?
 sleep infinity	#necessary ?
 
@@ -52,10 +54,6 @@ Ajouter index.php dans les configurations de Nginx.
 apt-get -y install vim
 
 # I put a test.php file containing: "<?php phpinfo();" in /var/www/html
-# it didn't do much, does not run as expected when i go to localhost/test.php
-# Not sure if this means php isn't working or i didnt do it right...
-# I can modify the index.html file tho and see it instantly on localhost
-
 
 
 # Testing if installing ssl makes php work...
@@ -71,6 +69,82 @@ ssl_certificate /etc/nginx/ssl/localhost.pem;
 ssl_certificate_key /etc/nginx/ssl/localhost.key;
 	#in the config file
 
+
+# Instal Maria.db
+apt-get install -y mariadb-server mariadb-client
+#start mariadb
+service mysql start
+#check DB
+mariadb
+	#now in SQL shell
+SHOW DATABASES;
+exit
+
+# Install and configure phpmyadmin
+
+#something about allowing it to connect to DBs
+apt install -y php-json php-mbstring
+#now we get phpmyadmin, just in english tho
+wget https://files.phpmyadmin.net/phpMyAdmin/4.9.0.1/phpMyAdmin-4.9.0.1-english.tar.gz
+#extract the file
+tar -zxvf phpMyAdmin-4.9.0.1-english.tar.gz
+#move it someplace useful
+mv phpMyAdmin-4.9.0.1-english /usr/share/phpMyAdmin
+#copying the sample config file
+cp -pr /usr/share/phpMyAdmin/config.sample.inc.php /usr/share/phpMyAdmin/config.inc.php
+	#to be edited, in final version will already have a proper one in srcs
+#need to update the "Blowfish secret" line, see the docs
+#there is a website that generates new passphrases.
+#uncomment a bunch of stuff, will want a copy of all that soon
+
+#something about creating tables
+mysql < /usr/share/phpMyAdmin/sql/create_tables.sql -u root -p
+	#asks for a password, i just hit enter ??? seems to have worked...
+#log into Mariadb
+mysql -u root -p
+	#also asks for password, i hit enter now in SQL shell
+#did some things in the shell about priviledges...
+GRANT ALL PRIVILEGES ON phpmyadmin.* TO 'erlazo'@'localhost' IDENTIFIED BY 'password';
+FLUSH PRIVILEGES;
+#now exit
+
+#now vim into
+/etc/nginx/conf.d/phpMyAdmin.conf
+	# will create a virtual host config file
+	# copy and pasted into that file the whole they they said (we'll see if that works)
+
+#create a tmp file and update permissions
+mkdir /usr/share/phpMyAdmin/tmp
+chmod 777 /usr/share/phpMyAdmin/tmp
+#now set ownership
+chown -R www-data:www-data /usr/share/phpMyAdmin
+
+#now need to restart nginx and php
+
+#now go back into SQL shell to create a DB
+CREATE DATABASE app_db;
+GRANT ALL PRIVILEGES ON app_db.* TO 'erlazo'@'localhost' IDENTIFIED BY 'password';
+FLUSH PRIVILEGES;
+exit
+
+
+What we do at the moment:
+Everything gets installed with the Dockerfile, but still need to run
+the docker container with /bin/sh to be get into the debian shell
+(maybe could do docker exec name /bin/sh ...)
+Then i modify the nginx config file
+create the test.php file
+start nginx
+start php
+
+now have access to the default nginx site at localhost
+and the php info at localhost/test.php
+
+install and start mariadb
+can check if worked with command: mariadb
+will put you in the sql shell
+then SHOW DATABAES; will do just that
+then exit
 
 
 
