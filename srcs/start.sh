@@ -5,7 +5,7 @@
 
 #making a key or something for ssl
 mkdir /etc/nginx/ssl
-openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out /etc/nginx/ssl/localhost.pem -keyout /etc/nginx/ssl/localhost.key -subj "/C=FR/ST=Paris/L=Paris/O=42 School/OU=emma/CN=localhost"
+openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out /etc/nginx/ssl/localhost.pem -keyout /etc/nginx/ssl/localhost.key -subj "/C=FR/ST=Paris/L=Paris/O=42 School/OU=erlazo/CN=localhost"
 
 
 #setting up config files
@@ -14,7 +14,7 @@ openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out /etc/nginx/ssl/
 	#already exists ???
 mkdir var/www/localhost
 
-mv ./old_nginx.config etc/nginx/sites-available/default
+mv ./nginx.config etc/nginx/sites-available/default
 #ln -s etc/nginx/sites-available/default etc/nginx/sites-enabled
 chown -R www-data /var/www/*
 chmod -R 755 /var/www/*
@@ -26,9 +26,12 @@ chmod -R 755 /var/www/*
 service mysql start
 echo "CREATE DATABASE wordpress DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;" | mysql -u root
 
+echo "CREATE USER wp_user@localhost IDENTIFIED BY 'password';" | mysql -u root
+	# yea this stuff is fucking up, need to fix the access and priviliges
+
 #echo "GRANT ALL ON wordpress.* TO 'root'@'localhost' WITH GRANT OPTION;" | mysql -u root
 #echo "update mysql.user set plugin='password' where user='root';" | mysql -u root
-echo "GRANT ALL ON wordpress.* TO 'wordpress_user'@'localhost' IDENTIFIED BY 'password';" | mysql -u root
+echo "GRANT ALL ON wordpress.* TO 'wp_user'@'localhost' IDENTIFIED BY 'password';" | mysql -u root
 
 echo "FLUSH PRIVILEGES;" | mysql -u root
 
@@ -43,7 +46,7 @@ chmod 660 /var/www/localhost/phpmyadmin/config.inc.php
 chown -R www-data:www-data /var/www/localhost/phpmyadmin
 #now we can start php
 service php7.3-fpm start
-echo "GRANT ALL ON *.* TO 'erlazo'@'localhost' IDENTIFIED BY 'password'" | mysql -u root
+echo "GRANT ALL ON *.* TO 'erlazo'@'localhost' IDENTIFIED BY '123';" | mysql -u root
 echo "FLUSH PRIVILEGES;" | mysql -u root
 
 #now wordpress
