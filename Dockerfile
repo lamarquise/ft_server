@@ -1,5 +1,7 @@
 FROM debian:buster
 
+ENV AUTOINDEX on
+
 RUN apt-get update
 RUN apt-get upgrade -y
 
